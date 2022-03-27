@@ -1,0 +1,46 @@
+service:
+  name: enrlich
+
+plugins:
+  - serverless-offline
+  - serverless-deployment-bucket
+  - serverless-webpack
+  - serverless-prune-plugin
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: ${env:AWS_ACCOUNT_REGION, 'ap-southeast-1'}
+  stage: ${opt:stage, env:STAGE}
+  endpointType:
+  ## create s3 bucket folder where store the code in aws
+  deploymentBucket:
+    name: deploy.${self:provider.region}.enrlich-services-${self:provider.stage}
+    serverSideEncryption: AES256
+  environment:
+    STAGE: ${self:provider.stage}
+    AURORA_DB_ENDPOINT: ${ssm:/${self:custom.stage}/rds/main_aurora_db_endpoint}
+    AURORA_DB_USERNAME: ${ssm:/${self:custom.stage}/rds/main_aurora_db_username}
+    AURORA_DB_PASSWORD: ${ssm:/${self:custom.stage}/rds/main_aurora_db_password}
+    AURORA_DB_NAME: ${ssm:/${self:custom.stage}/rds/main_aurora_db_name}
+    AURORA_DB_PORT: ${ssm:/${self:custom.stage}/rds/main_aurora_db_port}
+    DATABASE_URL: mysql://${ssm:/${self:custom.stage}/rds/main_aurora_db_username}:${ssm:/${self:custom.stage}/rds/main_aurora_db_password}@${ssm:/${self:custom.stage}/rds/main_aurora_db_endpoint}:${ssm:/${self:custom.stage}/rds/main_aurora_db_port}/${ssm:/${self:custom.stage}/rds/main_aurora_db_name}
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    packager: yarn
+    includeModules:
+      packagePath: './package.json'
+      forceExclude:
+        - '@types/aws-lambda'
+        - prisma
+  # function version prunner
+  prune:
+    automatic: true
+    number: 1
+  # serverless offline hot reload on code change
+  serverless-offline:
+    useChildProcesses: true
+    httpPort: 5000
+    lambdaPort: 5002
