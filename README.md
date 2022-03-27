@@ -33,14 +33,15 @@ ehrlich
  ┃ ┣ seeder
  ┃ ┗ migration
  ┣ serverless
- ┃ ┣ function
+ ┃ ┣ functions
  ┃ ┗ permissions
  ┣ src
- ┃ ┣ feature
+ ┃ ┣ features
  ┃ ┃ ┗ <feature api>
  ┃ ┃ ┃ ┣ datasource
  ┃ ┃ ┃ ┗ presentation
- ┃ ┗ utility
+ ┃ ┣ lib
+ ┃ ┗ utilities
  ┣ .env.example
  ┣ .gitignore
  ┣ package.json
